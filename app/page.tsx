@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Activity, BarChart3, FileText, Zap, Clock, TrendingUp } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
+import Image from 'next/image';
 
 // TypeScript interface matching your Supabase schema
 interface Analysis {
@@ -15,9 +16,9 @@ interface Analysis {
   total_peaks_found: number;
   background_peaks: number;
   isotope_families_detected: string[];
-  spectrum_data: Record<string, any>;
+  spectrum_data: Record<string, unknown>;
   plot_image?: string | null;
-  analysis_parameters: Record<string, any>;
+  analysis_parameters: Record<string, unknown>;
   status: string;
   created_at: string;
   updated_at: string;
@@ -62,7 +63,7 @@ const IsotopeDashboard = () => {
         .order('timestamp', { ascending: false });
       if (error) throw error;
       // Patch missing fields for type safety
-      const patched = (data as any[]).map((item) => ({
+      const patched = (data as Partial<Analysis>[]).map((item) => ({
         spectrum_data: item.spectrum_data || {},
         analysis_parameters: item.analysis_parameters || {},
         created_at: item.created_at || item.timestamp || new Date().toISOString(),
@@ -134,7 +135,7 @@ const IsotopeDashboard = () => {
     return () => {
       if (refreshInterval) clearInterval(refreshInterval);
     };
-  }, []);
+  }, [refreshInterval]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
@@ -438,7 +439,7 @@ const IsotopeDashboard = () => {
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3">Spectrum Plot</h3>
                     <div className="bg-gray-100 rounded-lg p-4 text-center">
-                      <img 
+                      <Image
                         src={
                           selectedAnalysis.plot_image.startsWith('data:image')
                             ? selectedAnalysis.plot_image
@@ -446,6 +447,9 @@ const IsotopeDashboard = () => {
                         }
                         alt="Spectrum Plot"
                         className="max-w-full h-auto mx-auto"
+                        width={400}
+                        height={200}
+                        unoptimized
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
