@@ -19,3 +19,5 @@ create table public.isotope_analyses (
     
     created_at timestamptz default now()
 );
+
+idk
