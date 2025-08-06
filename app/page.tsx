@@ -229,7 +229,7 @@ export default function AnalysisDashboard() {
           {currentAnalysis && (
             <>
               {/* Analysis Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-2">
@@ -268,19 +268,7 @@ export default function AnalysisDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <Eye className="h-5 w-5 text-orange-600" />
-                      <div>
-                        <p className="text-sm font-medium">Confidence</p>
-                        <p className="text-2xl font-bold">
-                          {(currentAnalysis.confidence_threshold * 100).toFixed(0)}%
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                
               </div>
 
               {/* Analysis Details Tabs */}
@@ -292,7 +280,7 @@ export default function AnalysisDashboard() {
                   <TabsTrigger value="plots">Plots</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="space-y-4">
+                <TabsContent value="overview" className="space-y-3">
                   <Card>
                     <CardHeader>
                       <CardTitle>Analysis Information</CardTitle>
@@ -318,21 +306,23 @@ export default function AnalysisDashboard() {
                       
                       {currentAnalysis.dominant_isotope && massEstimates.length > 0 && (
                         <div>
-                          <h4 className="font-medium mb-2">Mass Distribution</h4>
+                          <h4 className="font-medium mb-2">Isotope Mass Estimates</h4>
                           <div className="space-y-2">
                             {massEstimates.slice(0, 5).map((estimate) => {
-                              const percentage = (estimate.estimated_mass_g / currentAnalysis.total_estimated_mass_g) * 100;
+                              // Using max mass for scale reference
+                              const maxMass = Math.max(...massEstimates.map(e => e.estimated_mass_g));
+                              const barWidth = (estimate.estimated_mass_g / maxMass) * 100;
                               return (
                                 <div key={estimate.id} className="flex items-center space-x-3">
                                   <span className="w-16 text-sm font-medium">{estimate.parent_isotope}</span>
                                   <div className="flex-1 bg-gray-200 rounded-full h-2">
                                     <div 
                                       className="bg-blue-600 h-2 rounded-full" 
-                                      style={{ width: `${percentage}%` }}
+                                      style={{ width: `${barWidth}%` }}
                                     ></div>
                                   </div>
-                                  <span className="text-sm text-gray-600">
-                                    {formatMass(estimate.estimated_mass_g)} ({percentage.toFixed(1)}%)
+                                  <span className="text-sm text-gray-600 min-w-[120px] text-right">
+                                    {formatMass(estimate.estimated_mass_g)}
                                   </span>
                                 </div>
                               );
